@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { useI18n } from "@/contexts/i18n-context"
+import { WatermarkOverlay } from "@/app/components/watermark-overlay"
 import type { Locale, Messages } from "@/lib/i18n/translations"
 
 type StorageEntry =
@@ -539,7 +540,10 @@ export default function ModelPage() {
                 >
                   <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-white/5 bg-black/40">
                     {thumbnail ? (
-                      <img src={thumbnail} alt={record.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <div style={{ position: "relative", width: "100%", height: "100%", lineHeight: 0 }}>
+                        <img src={thumbnail} alt={record.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                        <WatermarkOverlay />
+                      </div>
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-gray-500">
                         <ImageIcon className="size-10" />

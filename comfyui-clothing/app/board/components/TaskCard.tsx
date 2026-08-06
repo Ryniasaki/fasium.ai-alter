@@ -2,6 +2,7 @@
 
 import type { Task } from "../types"
 import { IconRenderer } from "./IconRenderer"
+import { WatermarkOverlay } from "@/app/components/watermark-overlay"
 
 interface TaskCardProps {
   task: Task
@@ -16,11 +17,17 @@ export function TaskCard({ task }: TaskCardProps) {
         {isGrid ? (
           <div className="grid grid-cols-2 grid-rows-2 h-full gap-1 p-1 bg-white">
             {task.images.map((img, idx) => (
-              <img key={img + idx} src={img} alt="" className="w-full h-full object-cover rounded-2xl" />
+              <div key={img + idx} style={{ position: "relative", lineHeight: 0 }}>
+                <img src={img} alt="" className="w-full h-full object-cover rounded-2xl" />
+                <WatermarkOverlay />
+              </div>
             ))}
           </div>
         ) : (
-          <img src={task.images[0]} alt="" className="w-full h-full object-cover" />
+          <div style={{ position: "relative", width: "100%", height: "100%", lineHeight: 0 }}>
+            <img src={task.images[0]} alt="" className="w-full h-full object-cover" />
+            <WatermarkOverlay />
+          </div>
         )}
 
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer">

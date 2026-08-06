@@ -20,6 +20,7 @@ import { IconRenderer } from "./IconRenderer"
 import { ContextMenu } from "./ContextMenu"
 import { BoardFeaturePanel } from "./BoardFeaturePanel"
 import { BoardEmptyTutorialModal } from "./BoardEmptyTutorialModal"
+import { WatermarkOverlay } from "@/app/components/watermark-overlay"
 import { TOOLS } from "../constants"
 import { GoogleGenAI } from "@google/genai"
 
@@ -468,10 +469,13 @@ const isSvgUrl = (url: string | null | undefined): url is string => {
 type BoardImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "onError"> & {
   url: string
   onError?: () => void
+  /** 是否显示"AI生成"水印，默认 true */
+  showWatermark?: boolean
 }
 
 function SvgPreviewImage({
   url,
+  showWatermark = true,
   ...imgProps
 }: Omit<BoardImageProps, "onError">) {
   const [resolvedUrl, setResolvedUrl] = useState(url)
@@ -502,19 +506,30 @@ function SvgPreviewImage({
     }
   }, [url])
 
-  return <img src={resolvedUrl} {...imgProps} />
+  return (
+    <div style={{ position: "relative", display: "inline-block", lineHeight: 0 }}>
+      <img src={resolvedUrl} {...imgProps} />
+      {showWatermark && <WatermarkOverlay />}
+    </div>
+  )
 }
 
 function RenderableBoardImage({
   url,
   onError,
+  showWatermark = true,
   ...imgProps
 }: BoardImageProps) {
   if (isSvgUrl(url)) {
-    return <SvgPreviewImage url={url} {...imgProps} />
+    return <SvgPreviewImage url={url} showWatermark={showWatermark} {...imgProps} />
   }
 
-  return <img src={url} onError={onError} {...imgProps} />
+  return (
+    <div style={{ position: "relative", display: "inline-block", lineHeight: 0 }}>
+      <img src={url} onError={onError} {...imgProps} />
+      {showWatermark && <WatermarkOverlay />}
+    </div>
+  )
 }
 
 const getRulerLabelStep = (assetWidth: number, assetHeight: number, cmRange: number) => {
