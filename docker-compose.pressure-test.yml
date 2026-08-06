@@ -1,0 +1,52 @@
+services:
+  mock-models:
+    image: python:3.12-slim
+    container_name: fasium-mock-models
+    restart: unless-stopped
+    command: ["python", "/app/pressure-test/mock_model_service.py"]
+    environment:
+      MOCK_MODEL_HOST: 0.0.0.0
+      MOCK_MODEL_PORT: 9000
+    volumes:
+      - ./pressure-test:/app/pressure-test:ro
+    ports:
+      - "19090:9000"
+
+  mock-runninghub:
+    image: python:3.12-slim
+    container_name: fasium-mock-runninghub
+    restart: unless-stopped
+    command: ["python", "/app/pressure-test/mock_runninghub_service.py"]
+    environment:
+      MOCK_RUNNINGHUB_HOST: 0.0.0.0
+      MOCK_RUNNINGHUB_PORT: 8080
+      MOCK_RUNNINGHUB_BASE_URL: http://mock-runninghub:8080
+    volumes:
+      - ./pressure-test:/app/pressure-test:ro
+    ports:
+      - "19080:8080"
+
+  runninghub-service:
+    environment:
+      RUNNINGHUB_API_KEY: ${RUNNINGHUB_API_KEY:-pressure-test}
+      RUNNINGHUB_HOST: http://mock-runninghub:8080
+
+  tenant-service:
+    environment:
+      PRESSURE_TEST_MODE: "true"
+      RUNNINGHUB_SERVICE_URL: http://mock-runninghub:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: Jototech
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!QAZxsw2}
+      POSTGRES_DATABASE: comfyui_tenant_service
+
+  tenant-worker:
+    environment:
+      PRESSURE_TEST_MODE: "true"
+      RUNNINGHUB_SERVICE_URL: http://mock-runninghub:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: Jototech
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!QAZxsw2}
+      POSTGRES_DATABASE: comfyui_tenant_service

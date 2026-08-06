@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build output
+.next/
+out/
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.local
+.env.tencent
+.env.production
+*.pem
+*.key
+
+# Keep example env files
+!.env.example
+!.env.local.example
+!.env.tencent.example
+
+# Reference projects (not part of codebase)
+ref/
+
+# Temp files & browser profiles
+tmp/
+**/tmp/
+*.tmp
+
+# Backups & data dumps
+backups/
+output/
+exports/
+*.sql
+*.dump
+*.bak
+*.db
+*.sqlite
+
+# Uploaded files & runtime assets
+**/input/upload/
+**/uploads/
+
+# Generated/static images (trending, dashboard screenshots)
+**/image/trending/
+**/image/dashboard/
+
+# Test results & artifacts
+pressure-test-results-*.json
+docs.zip
+loadtest/
+
+# Large docs (presentations, videos, etc.)
+*.pptx
+*.ppt
+*.mp4
+*.mov
+*.avi
+*.zip
+*.7z
+*.rar
+
+# IDE & editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# AI assistant configs
+.claude/
+.agents/
+
+# Runtime data & databases (JSON-based local DBs, generated reports)
+**/database/*.json
+**/database/*.db
+**/database/*.sqlite
+**/database/report/
+!**/database/*.example.json
+!**/database/project.json
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

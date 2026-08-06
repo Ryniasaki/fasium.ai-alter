@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.github
+*.log
+tsconfig.tsbuildinfo
+coverage
+dist
+Dockerfile*
+README.md
+*.md

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfyUI服装印花处理系统架构图</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      padding: 30px 0;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .nav {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav h2 {
+      color: #4a5568;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    .nav-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      list-style: none;
+    }
+
+    .nav-item {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .section h2 {
+      color: #2d3748;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .section h3 {
+      color: #4a5568;
+      margin: 25px 0 15px 0;
+      font-size: 1.3em;
+    }
+
+    .mermaid {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .flow-description {
+      background: #f7fafc;
+      border-left: 4px solid #667eea;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .flow-description h4 {
+      color: #2d3748;
+      margin-bottom: 8px;
+    }
+
+    .flow-description p {
+      color: #4a5568;
+      margin: 5px 0;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card h4 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      opacity: 0.9;
+      font-size: 0.95em;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 2em;
+      }
+
+      .nav-list {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 ComfyUI服装印花处理系统</h1>
+      <p>智能服装设计解决方案 - 系统架构图</p>
+    </div>
+
+    <div class="nav">
+      <h2>📋 导航菜单</h2>
+      <ul class="nav-list">
+        <li><a href="#overview" class="nav-item">系统整体架构</a></li>
+        <li><a href="#f1-flow" class="nav-item">F1定向改款流程</a></li>
+        <li><a href="#f2-flow" class="nav-item">F2印花提取流程</a></li>
+        <li><a href="#f3-flow" class="nav-item">F3印花应用流程</a></li>
+        <li><a href="#f4-flow" class="nav-item">F4模特换装流程</a></li>
+        <li><a href="#f5-flow" class="nav-item">F5 CAD联动流程</a></li>
+        <li><a href="#data-flow" class="nav-item">数据流图</a></li>
+        <li><a href="#components" class="nav-item">系统组件关系</a></li>
+      </ul>
+    </div>
+
+    <div class="section" id="overview">
+      <h2>🏗️ 系统整体架构图</h2>
+      <div class="mermaid">
+        graph TB
+        A[用户界面] --> B[ComfyUI服装印花处理系统]
+
+        B --> C[F1: 定向改款模块]
+        B --> D[F2: 印花提取与变种生成模块]
+        B --> E[F3: 印花应用模块]
+        B --> F[F4: 模特换装模块]
+        B --> G[F5: CAD联动模块]
+
+        C --> C1[图片上传]
+        C --> C2[区域选择]
+        C --> C3[定向修改]
+
+        D --> D1[印花提取]
+        D --> D2[变种生成]
+        D --> D3[人物生成]
+
+        E --> E1[模特图输入]
+        E --> E2[印花上传]
+        E --> E3[印花应用]
+
+        F --> F1[模特图输入]
+        F --> F2[配饰输入]
+        F --> F3[服装输入]
+        F --> F4[背景输入]
+        F --> F5[图像合成]
+        F --> F6[视频生成]
+
+        G --> G1[模特图输入]
+        G --> G2[素描生成]
+
+        H[AI模型层] --> C3
+        H --> D1
+        H --> D2
+        H --> D3
+        H --> E3
+        H --> F5
+        H --> F6
+        H --> G2
+
+        I[数据存储层] --> B
+      </div>
+      <div class="flow-description">
+        <h4>系统架构说明</h4>
+        <p>• <strong>用户界面层</strong>：提供Web界面，支持文件上传、图像编辑和结果展示</p>
+        <p>• <strong>业务逻辑层</strong>：包含5个核心功能模块，处理不同的服装设计需求</p>
+        <p>• <strong>AI模型层</strong>：提供图像处理、生成和合成的AI能力</p>
+        <p>• <strong>数据存储层</strong>：管理图片、模型和配置数据</p>
+      </div>
+    </div>
+
+    <div class="section" id="f1-flow">
+      <h2>🔧 F1定向改款模块流程图</h2>
+      <div class="mermaid">
+        flowchart TD
+        A[开始] --> B[上传图片]
+        B --> C[圈出修改区域]
+        C --> D[输入修改Prompt]
+        D --> E[选择修改类型]
+        E --> F{修改类型}
+        F -->|服装样式| G[服装样式修改]
+        F -->|工业设计| H[工业设计修改]
+        G --> I[生成修改结果]
+        H --> I
+        I --> J[结束]
+      </div>
+      <div class="flow-description">
+        <h4>F1模块功能</h4>
+        <p>• 支持对服装特定区域进行精确修改</p>
+        <p>• 提供服装样式和工业设计两种修改模式</p>
+        <p>• 基于用户Prompt进行智能改款</p>
+      </div>
+    </div>
+
+    <div class="section" id="f2-flow">
+      <h2>🎨 F2印花提取与变种生成模块流程图</h2>
+      <div class="mermaid">
+        flowchart TD
+        A[开始] --> B[上传模特图]
+        B --> C[设置图片比例]
+        C --> D[提取印花风格]
+        D --> E[选择变种类型]
+        E --> F{变种类型}
+        F -->|满印| G[生成满印变种]
+        F -->|局部印花| H[生成局部印花变种]
+        G --> I[生成人物图像]
+        H --> I
+        I --> J[结束]
+      </div>
+      <div class="flow-description">
+        <h4>F2模块功能</h4>
+        <p>• 自动从模特图中提取印花风格</p>
+        <p>• 支持满印和局部印花两种变种生成</p>
+        <p>• 可生成穿着新印花服装的人物图像</p>
+      </div>
+    </div>
+
+    <div class="section" id="f3-flow">
+      <h2>👕 F3印花应用模块流程图</h2>
+      <div class="mermaid">
+        flowchart TD
+        A[开始] --> B[输入模特图]
+        B --> C[上传印花图]
+        C --> D[调整Scale]
+        D --> E[选择印花模式]
+        E --> F{印花模式}
+        F -->|满印| G[满印模式]
+        F -->|局部印花| H[局部印花模式]
+        G --> I[拼接图片]
+        H --> I
+        I --> J[选择修改类型]
+        J --> K{修改类型}
+        K -->|服装修改| L[修改服装]
+        K -->|容貌修改| M[修改容貌]
+        L --> N[生成结果]
+        M --> N
+        N --> O[结束]
+      </div>
+      <div class="flow-description">
+        <h4>F3模块功能</h4>
+        <p>• 将印花图案应用到服装上</p>
+        <p>• 支持满印和局部印花两种应用模式</p>
+        <p>• 可同时修改服装和模特容貌</p>
+      </div>
+    </div>
+
+    <div class="section" id="f4-flow">
+      <h2>👗 F4模特换装模块流程图</h2>
+      <div class="mermaid">
+        flowchart TD
+        A[开始] --> B[输入模特三视图]
+        B --> C[选择输入元素]
+        C --> D{至少选择一个}
+        D -->|配饰| E[输入配饰图]
+        D -->|服装| F[输入服装图]
+        D -->|背景| G[输入背景图]
+        E --> H[图像合成]
+        F --> H
+        G --> H
+        H --> I[生成视频]
+        I --> J[结束]
+      </div>
+      <div class="flow-description">
+        <h4>F4模块功能</h4>
+        <p>• 支持模特换装、换配饰、换背景</p>
+        <p>• 至少需要选择一个输入元素</p>
+        <p>• 可生成换装后的视频展示效果</p>
+      </div>
+    </div>
+
+    <div class="section" id="f5-flow">
+      <h2>📐 F5 CAD联动模块流程图</h2>
+      <div class="mermaid">
+        flowchart TD
+        A[开始] --> B[输入模特图]
+        B --> C[AI分析服装结构]
+        C --> D[生成素描概念图]
+        D --> E[输出CAD格式]
+        E --> F[结束]
+      </div>
+      <div class="flow-description">
+        <h4>F5模块功能</h4>
+        <p>• 基于模特图分析服装结构</p>
+        <p>• 生成专业的素描概念图</p>
+        <p>• 输出标准CAD格式文件</p>
+      </div>
+    </div>
+
+    <div class="section" id="data-flow">
+      <h2>🔄 数据流图</h2>
+      <div class="mermaid">
+        graph LR
+        A[用户输入] --> B[图片处理]
+        B --> C[AI模型推理]
+        C --> D[结果生成]
+        D --> E[用户输出]
+
+        F[图片存储] --> B
+        G[模型参数] --> C
+        H[配置信息] --> B
+      </div>
+      <div class="flow-description">
+        <h4>数据流向说明</h4>
+        <p>• <strong>用户输入</strong> → 图片处理 → AI模型推理 → 结果生成 → 用户输出</p>
+        <p>• <strong>数据支持</strong>：图片存储、模型参数、配置信息</p>
+      </div>
+    </div>
+
+    <div class="section" id="components">
+      <h2>🔗 系统组件关系图</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "前端层"
+        A[Web界面]
+        B[文件上传组件]
+        C[图像编辑组件]
+        D[结果展示组件]
+        end
+
+        subgraph "业务逻辑层"
+        E[F1定向改款服务]
+        F[F2印花处理服务]
+        G[F3印花应用服务]
+        H[F4模特换装服务]
+        I[F5 CAD联动服务]
+        end
+
+        subgraph "AI模型层"
+        J[图生图模型]
+        K[印花提取模型]
+        L[变种生成模型]
+        M[图像合成模型]
+        N[视频生成模型]
+        end
+
+        subgraph "数据层"
+        O[图片存储]
+        P[模型存储]
+        Q[配置存储]
+        end
+
+        A --> E
+        A --> F
+        A --> G
+        A --> H
+        A --> I
+
+        B --> E
+        B --> F
+        B --> G
+        B --> H
+        B --> I
+
+        C --> E
+        C --> G
+
+        D --> A
+
+        E --> J
+        F --> K
+        F --> L
+        G --> J
+        H --> M
+        H --> N
+        I --> J
+
+        J --> O
+        K --> P
+        L --> P
+        M --> O
+        N --> O
+
+        E --> Q
+        F --> Q
+        G --> Q
+        H --> Q
+        I --> Q
+      </div>
+      <div class="flow-description">
+        <h4>组件关系说明</h4>
+        <p>• <strong>前端层</strong>：用户交互界面，包含Web界面和各种功能组件</p>
+        <p>• <strong>业务逻辑层</strong>：核心业务服务，处理各种功能需求</p>
+        <p>• <strong>AI模型层</strong>：提供AI能力，包括图像生成、处理和分析</p>
+        <p>• <strong>数据层</strong>：数据存储和管理，支持系统运行</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>✨ 系统特色功能</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>🎯 智能定向改款</h4>
+          <p>基于AI技术，支持对服装特定区域进行精确修改，提供服装样式和工业设计两种模式</p>
+        </div>
+        <div class="feature-card">
+          <h4>🎨 印花自动提取</h4>
+          <p>从模特图中自动提取印花风格，支持满印和局部印花变种生成</p>
+        </div>
+        <div class="feature-card">
+          <h4>👕 印花智能应用</h4>
+          <p>将印花图案智能应用到服装上，支持多种应用模式和参数调整</p>
+        </div>
+        <div class="feature-card">
+          <h4>👗 模特换装系统</h4>
+          <p>支持模特换装、换配饰、换背景，并可生成视频展示效果</p>
+        </div>
+        <div class="feature-card">
+          <h4>📐 CAD专业联动</h4>
+          <p>与CAD系统联动，输出专业的素描概念图和标准CAD格式文件</p>
+        </div>
+        <div class="feature-card">
+          <h4>🤖 AI驱动设计</h4>
+          <p>基于先进的AI模型，提供智能化的服装设计解决方案</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="返回顶部">
+    ↑
+  </button>
+
+  <script>
+    // 初始化Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true
+      },
+      themeVariables: {
+        primaryColor: '#667eea',
+        primaryTextColor: '#2d3748',
+        primaryBorderColor: '#4a5568',
+        lineColor: '#667eea',
+        secondaryColor: '#f7fafc',
+        tertiaryColor: '#e2e8f0'
+      }
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // 返回顶部按钮显示/隐藏
+    window.addEventListener('scroll', function () {
+      const backToTop = document.querySelector('.back-to-top');
+      if (window.pageYOffset > 300) {
+        backToTop.style.display = 'block';
+      } else {
+        backToTop.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+
+</html>
+

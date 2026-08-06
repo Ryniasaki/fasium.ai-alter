@@ -1,0 +1,12 @@
+Tenant Test Accounts (Template Only)
+-----------------------------------
+Do not store real usernames/passwords in this repository.
+
+Use one of the following approaches instead:
+1. Keep test credentials in your local `.env` (never committed).
+2. Use a secrets manager (Vault / AWS Secrets Manager / etc.).
+3. Share temporary credentials through a secure channel only.
+
+Example (redacted):
+- Username: test_user_example
+- Password: <from local secret store>

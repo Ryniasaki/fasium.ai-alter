@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 221 83% 53%;
+    --radius: 1rem;
+    --ruler-surface: 0 0% 100%;
+    --ruler-border: 220 13% 90%;
+    --ruler-tick: 220 9% 45%;
+    --ruler-text: 220 9% 35%;
+    --ruler-shadow: 220 9% 20%;
+    --ruler-tip-surface: 0 0% 100%;
+    --ruler-tip-border: 220 13% 90%;
+    --ruler-tip-text: 220 9% 35%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 217 91% 60%;
+    --ruler-surface: 220 13% 13%;
+    --ruler-border: 220 13% 22%;
+    --ruler-tick: 220 9% 70%;
+    --ruler-text: 220 9% 80%;
+    --ruler-shadow: 220 13% 5%;
+    --ruler-tip-surface: 220 13% 13%;
+    --ruler-tip-border: 220 13% 22%;
+    --ruler-tip-text: 220 9% 85%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer base {
+  .light {
+    color-scheme: light;
+  }
+
+  .light [class*="text-white"],
+  .light [class*="text-white/"] {
+    color: hsl(var(--foreground) / var(--tw-text-opacity, 1));
+  }
+
+  .light [class*="text-gray-"],
+  .light [class*="text-slate-"],
+  .light [class*="text-neutral-"] {
+    color: hsl(var(--muted-foreground) / var(--tw-text-opacity, 1));
+  }
+
+  .light [class*="bg-black"],
+  .light [class*="bg-slate-9"],
+  .light [class*="bg-neutral-9"],
+  .light [class*="bg-[#050505]"],
+  .light [class*="bg-[#050406]"],
+  .light [class*="bg-[#0a0a0a]"],
+  .light [class*="bg-[#0A0A0A]"],
+  .light [class*="bg-[#0E0E0E]"],
+  .light [class*="bg-[#111]"] {
+    background-color: hsl(var(--background) / var(--tw-bg-opacity, 1));
+  }
+
+  .light [class*="bg-white/"] {
+    background-color: hsl(var(--foreground) / var(--tw-bg-opacity, 1));
+  }
+
+  .light [class*="border-white"] {
+    border-color: hsl(var(--border) / var(--tw-border-opacity, 1));
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.5s ease-out;
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.seamless-pattern-scroll {
+  animation: seamless-pattern-scroll 24s linear infinite;
+}
+
+@keyframes seamless-pattern-scroll {
+  from {
+    background-position-x: 0%;
+  }
+  to {
+    background-position-x: -100%;
+  }
+}

@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfyUI服装印花处理系统 - B/S架构图 (MVP版本)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      padding: 30px 0;
+    }
+
+    .header h1 {
+      font-size: 2.8em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.3em;
+      opacity: 0.9;
+    }
+
+    .nav {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav h2 {
+      color: #4a5568;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    .nav-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      list-style: none;
+    }
+
+    .nav-item {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .section h2 {
+      color: #2d3748;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .section h3 {
+      color: #4a5568;
+      margin: 25px 0 15px 0;
+      font-size: 1.3em;
+    }
+
+    .mermaid {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .tech-card {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .tech-card h4 {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tech-card .icon {
+      font-size: 1.5em;
+      margin-right: 10px;
+    }
+
+    .tech-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tech-card li {
+      margin: 8px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .tech-card li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .deployment-info {
+      background: #f7fafc;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .deployment-info h4 {
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+
+    .deployment-info p {
+      color: #4a5568;
+      margin: 5px 0;
+    }
+
+    .mvp-badge {
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 2.2em;
+      }
+
+      .nav-list {
+        grid-template-columns: 1fr;
+      }
+
+      .tech-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ ComfyUI服装印花处理系统</h1>
+      <p>B/S架构 - MVP版本 <span class="mvp-badge">MVP</span></p>
+    </div>
+
+    <div class="nav">
+      <h2>📋 架构导航</h2>
+      <ul class="nav-list">
+        <li><a href="#overview" class="nav-item">整体B/S架构</a></li>
+        <li><a href="#frontend" class="nav-item">前端层</a></li>
+        <li><a href="#backend" class="nav-item">后端层</a></li>
+        <li><a href="#database" class="nav-item">数据存储层</a></li>
+        <li><a href="#ai-service" class="nav-item">AI服务层</a></li>
+        <li><a href="#deployment" class="nav-item">Docker部署</a></li>
+        <li><a href="#tech-stack" class="nav-item">技术栈详情</a></li>
+      </ul>
+    </div>
+
+    <div class="section" id="overview">
+      <h2>🏗️ 整体B/S架构图 (MVP版本)</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "Docker容器编排"
+        subgraph "前端层"
+        A[NextJS React前端<br />Port: 3000]
+        end
+
+        subgraph "后端服务层"
+        B[FastAPI后端服务<br />Port: 8000]
+        C[RunningHub API客户端<br />内置服务]
+        end
+
+        subgraph "数据存储层"
+        D[MySQL数据库<br />Port: 3306]
+        E[Redis缓存<br />Port: 6379]
+        F[文件存储服务<br />Port: 9000]
+        end
+        end
+
+        subgraph "外部AI服务"
+        G[RunningHub API<br />外部服务]
+        H[ComfyUI工作流<br />RunningHub内部]
+        end
+
+        A -->|HTTP/WebSocket| B
+        B -->|数据操作| D
+        B -->|缓存操作| E
+        B -->|文件操作| F
+        B -->|AI调用| C
+        C -->|API调用| G
+        G -->|内部调用| H
+
+        subgraph "功能模块"
+        I[F1定向改款模块]
+        J[F2印花提取模块]
+        K[F3印花应用模块]
+        L[F4模特换装模块]
+        M[F5 CAD联动模块]
+        end
+
+        B --> I
+        B --> J
+        B --> K
+        B --> L
+        B --> M
+
+        I --> C
+        J --> C
+        K --> C
+        L --> C
+        M --> C
+      </div>
+      <div class="deployment-info">
+        <h4>B/S架构特点 (MVP版本)</h4>
+        <p>• <strong>传统B/S架构</strong>：浏览器-服务器模式，简化部署和维护</p>
+        <p>• <strong>单体后端</strong>：FastAPI后端服务，包含所有业务逻辑</p>
+        <p>• <strong>模块化设计</strong>：后端按功能模块组织，便于后续拆分</p>
+        <p>• <strong>外部AI服务</strong>：通过RunningHub API调用ComfyUI，无需直接暴露</p>
+        <p>• <strong>容器化部署</strong>：Docker部署，便于扩展和维护</p>
+      </div>
+    </div>
+
+    <div class="section" id="frontend">
+      <h2>🎨 前端层架构</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "NextJS React前端"
+        A[用户界面层]
+        B[组件层]
+        C[状态管理层]
+        D[API通信层]
+        E[路由层]
+        end
+
+        subgraph "技术栈"
+        F[Next.js 14.2.16]
+        G[React 18]
+        H[Tailwind CSS]
+        I[Radix UI]
+        J[TypeScript]
+        end
+
+        subgraph "功能页面"
+        K[F1定向改款页面]
+        L[F2印花提取页面]
+        M[F3印花应用页面]
+        N[F4模特换装页面]
+        O[F5 CAD联动页面]
+        P[仪表板页面]
+        end
+
+        A --> B
+        B --> C
+        C --> D
+        D --> E
+
+        F --> A
+        G --> B
+        H --> B
+        I --> B
+        J --> A
+
+        E --> K
+        E --> L
+        E --> M
+        E --> N
+        E --> O
+        E --> P
+
+        D -->|HTTP/WebSocket| Q[FastAPI后端]
+      </div>
+      <div class="deployment-info">
+        <h4>前端层特点</h4>
+        <p>• <strong>现代化框架</strong>：Next.js 14 + React 18 + TypeScript</p>
+        <p>• <strong>响应式设计</strong>：Tailwind CSS + Radix UI组件库</p>
+        <p>• <strong>模块化架构</strong>：按功能模块拆分页面和组件</p>
+        <p>• <strong>实时通信</strong>：WebSocket支持实时状态更新</p>
+        <p>• <strong>容器化部署</strong>：Docker容器运行，端口3000</p>
+      </div>
+    </div>
+
+    <div class="section" id="backend">
+      <h2>⚙️ 后端层架构</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "FastAPI后端服务"
+        A[API路由层]
+        B[业务逻辑层]
+        C[数据访问层]
+        D[RunningHub客户端]
+        end
+
+        subgraph "功能模块"
+        E[F1定向改款模块]
+        F[F2印花提取模块]
+        G[F3印花应用模块]
+        H[F4模特换装模块]
+        I[F5 CAD联动模块]
+        end
+
+        subgraph "数据访问"
+        J[MySQL连接池]
+        K[Redis连接池]
+        L[文件存储客户端]
+        end
+
+        subgraph "外部服务"
+        M[RunningHub API]
+        end
+
+        A --> B
+        B --> C
+        B --> D
+
+        B --> E
+        B --> F
+        B --> G
+        B --> H
+        B --> I
+
+        E --> D
+        F --> D
+        G --> D
+        H --> D
+        I --> D
+
+        C --> J
+        C --> K
+        C --> L
+
+        D --> M
+
+        E --> J
+        F --> J
+        G --> J
+        H --> J
+        I --> J
+
+        E --> K
+        F --> K
+        G --> K
+        H --> K
+        I --> K
+      </div>
+      <div class="deployment-info">
+        <h4>后端层特点</h4>
+        <p>• <strong>单体架构</strong>：FastAPI后端服务，包含所有业务逻辑</p>
+        <p>• <strong>模块化设计</strong>：按功能模块组织代码，便于维护</p>
+        <p>• <strong>Python技术栈</strong>：FastAPI + Pydantic + SQLAlchemy</p>
+        <p>• <strong>异步处理</strong>：支持高并发异步请求处理</p>
+        <p>• <strong>API客户端</strong>：内置RunningHub API客户端</p>
+      </div>
+    </div>
+
+    <div class="section" id="database">
+      <h2>🗄️ 数据存储层架构</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "MySQL主数据库"
+        A[用户数据表]
+        B[项目数据表]
+        C[图片元数据表]
+        D[处理记录表]
+        E[配置参数表]
+        end
+
+        subgraph "Redis缓存层"
+        F[会话缓存]
+        G[API响应缓存]
+        H[图片处理状态缓存]
+        I[临时数据缓存]
+        end
+
+        subgraph "文件存储服务"
+        J[原始图片存储]
+        K[处理结果存储]
+        L[临时文件存储]
+        end
+
+        subgraph "数据访问层"
+        M[MySQL连接池]
+        N[Redis连接池]
+        O[文件存储客户端]
+        end
+
+        A --> M
+        B --> M
+        C --> M
+        D --> M
+        E --> M
+
+        F --> N
+        G --> N
+        H --> N
+        I --> N
+
+        J --> O
+        K --> O
+        L --> O
+
+        M -->|读写分离| P[MySQL主从集群]
+        N -->|集群模式| Q[Redis集群]
+        O -->|分布式存储| R[MinIO/S3]
+      </div>
+      <div class="deployment-info">
+        <h4>数据存储特点</h4>
+        <p>• <strong>MySQL主数据库</strong>：存储业务数据，支持读写分离</p>
+        <p>• <strong>Redis缓存</strong>：提升性能，存储会话和临时数据</p>
+        <p>• <strong>文件存储</strong>：MinIO/S3分布式存储图片和模型文件</p>
+        <p>• <strong>数据一致性</strong>：事务支持，保证数据一致性</p>
+        <p>• <strong>高可用性</strong>：主从复制，集群部署</p>
+      </div>
+    </div>
+
+    <div class="section" id="ai-service">
+      <h2>🤖 AI服务层架构</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "RunningHub API服务"
+        A[API网关]
+        B[工作流管理]
+        C[任务队列]
+        D[结果存储]
+        end
+
+        subgraph "ComfyUI工作流"
+        E[F1定向改款工作流]
+        F[F2印花提取工作流]
+        G[F3印花应用工作流]
+        H[F4模特换装工作流]
+        I[F5 CAD联动工作流]
+        end
+
+        subgraph "AI模型"
+        J[图生图模型]
+        K[印花提取模型]
+        L[变种生成模型]
+        M[图像合成模型]
+        N[视频生成模型]
+        end
+
+        subgraph "我们的后端"
+        O[FastAPI后端]
+        P[RunningHub客户端]
+        end
+
+        O --> P
+        P -->|HTTP API| A
+        A --> B
+        B --> C
+        C --> D
+
+        B --> E
+        B --> F
+        B --> G
+        B --> H
+        B --> I
+
+        E --> J
+        F --> K
+        F --> L
+        G --> J
+        H --> M
+        H --> N
+        I --> J
+
+        D -->|结果返回| P
+        P -->|结果处理| O
+      </div>
+      <div class="deployment-info">
+        <h4>AI服务特点</h4>
+        <p>• <strong>外部服务</strong>：通过RunningHub API调用，无需直接部署ComfyUI</p>
+        <p>• <strong>工作流管理</strong>：RunningHub管理ComfyUI工作流</p>
+        <p>• <strong>任务队列</strong>：异步处理AI任务，支持并发</p>
+        <p>• <strong>结果存储</strong>：处理结果自动存储，支持查询</p>
+        <p>• <strong>API客户端</strong>：内置客户端，简化调用流程</p>
+      </div>
+    </div>
+
+    <div class="section" id="deployment">
+      <h2>🐳 Docker部署架构</h2>
+      <div class="mermaid">
+        graph TB
+        subgraph "Docker Compose编排"
+        subgraph "前端容器"
+        A[NextJS容器<br />nginx:alpine]
+        end
+
+        subgraph "后端容器"
+        B[FastAPI后端容器<br />python:3.11-slim]
+        end
+
+        subgraph "数据容器"
+        C[MySQL容器<br />mysql:8.0]
+        D[Redis容器<br />redis:7-alpine]
+        E[MinIO容器<br />minio/minio]
+        end
+        end
+
+        subgraph "外部服务"
+        F[RunningHub API<br />外部服务]
+        G[ComfyUI工作流<br />RunningHub内部]
+        end
+
+        subgraph "Docker网络"
+        H[前端网络<br />frontend-net]
+        I[后端网络<br />backend-net]
+        J[数据网络<br />data-net]
+        end
+
+        A --> H
+        B --> I
+        C --> J
+        D --> J
+        E --> J
+
+        H --> I
+        I --> J
+        I -->|API调用| F
+        F --> G
+      </div>
+      <div class="deployment-info">
+        <h4>Docker部署特点</h4>
+        <p>• <strong>简化部署</strong>：B/S架构，减少容器数量</p>
+        <p>• <strong>Docker Compose</strong>：一键启动整个系统</p>
+        <p>• <strong>网络隔离</strong>：不同服务使用不同的Docker网络</p>
+        <p>• <strong>数据持久化</strong>：使用Docker Volume持久化数据</p>
+        <p>• <strong>外部依赖</strong>：RunningHub作为外部服务，无需容器化</p>
+      </div>
+    </div>
+
+    <div class="section" id="tech-stack">
+      <h2>🛠️ 技术栈详情</h2>
+      <div class="tech-stack">
+        <div class="tech-card">
+          <h4><span class="icon">⚛️</span>前端技术栈</h4>
+          <ul>
+            <li>Next.js 14.2.16 - React全栈框架</li>
+            <li>React 18 - 用户界面库</li>
+            <li>TypeScript - 类型安全</li>
+            <li>Tailwind CSS - 样式框架</li>
+            <li>Radix UI - 组件库</li>
+            <li>Axios - HTTP客户端</li>
+            <li>Socket.io - WebSocket通信</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🐍</span>后端技术栈</h4>
+          <ul>
+            <li>Python 3.11 - 编程语言</li>
+            <li>FastAPI - Web框架</li>
+            <li>Pydantic - 数据验证</li>
+            <li>SQLAlchemy - ORM框架</li>
+            <li>Alembic - 数据库迁移</li>
+            <li>Redis - 缓存和消息队列</li>
+            <li>Uvicorn - ASGI服务器</li>
+            <li>Requests - HTTP客户端</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🗄️</span>数据存储</h4>
+          <ul>
+            <li>MySQL 8.0 - 关系型数据库</li>
+            <li>Redis 7 - 缓存数据库</li>
+            <li>MinIO - 对象存储</li>
+            <li>SQLAlchemy - ORM框架</li>
+            <li>Redis-py - Redis客户端</li>
+            <li>MinIO-py - 对象存储客户端</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🤖</span>AI服务集成</h4>
+          <ul>
+            <li>RunningHub API - AI服务接口</li>
+            <li>ComfyUI工作流 - AI处理引擎</li>
+            <li>HTTP API调用 - 服务通信</li>
+            <li>异步任务处理 - 后台处理</li>
+            <li>结果轮询机制 - 状态检查</li>
+            <li>错误重试机制 - 容错处理</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🐳</span>部署运维</h4>
+          <ul>
+            <li>Docker - 容器化</li>
+            <li>Docker Compose - 容器编排</li>
+            <li>Nginx - 反向代理</li>
+            <li>Prometheus - 监控</li>
+            <li>Grafana - 可视化</li>
+            <li>ELK Stack - 日志分析</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🔧</span>开发工具</h4>
+          <ul>
+            <li>Git - 版本控制</li>
+            <li>GitHub Actions - CI/CD</li>
+            <li>VS Code - 开发环境</li>
+            <li>Postman - API测试</li>
+            <li>Swagger - API文档</li>
+            <li>Jest - 前端测试</li>
+            <li>Pytest - 后端测试</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>✨ MVP架构优势</h2>
+      <div class="tech-stack">
+        <div class="tech-card">
+          <h4><span class="icon">🚀</span>快速开发</h4>
+          <ul>
+            <li>B/S架构，简化部署</li>
+            <li>单体后端，减少复杂度</li>
+            <li>外部AI服务，专注业务</li>
+            <li>容器化部署，环境一致</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">💰</span>成本控制</h4>
+          <ul>
+            <li>减少服务器资源</li>
+            <li>外部AI服务按需付费</li>
+            <li>简化运维成本</li>
+            <li>快速迭代验证</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">🔧</span>易于维护</h4>
+          <ul>
+            <li>代码集中，便于调试</li>
+            <li>模块化设计，便于扩展</li>
+            <li>外部依赖，减少维护</li>
+            <li>Docker部署，环境隔离</li>
+          </ul>
+        </div>
+
+        <div class="tech-card">
+          <h4><span class="icon">📈</span>便于扩展</h4>
+          <ul>
+            <li>模块化设计，便于拆分</li>
+            <li>API接口，便于集成</li>
+            <li>容器化部署，便于扩展</li>
+            <li>外部服务，便于升级</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="返回顶部">
+    ↑
+  </button>
+
+  <script>
+    // 初始化Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true
+      },
+      themeVariables: {
+        primaryColor: '#667eea',
+        primaryTextColor: '#2d3748',
+        primaryBorderColor: '#4a5568',
+        lineColor: '#667eea',
+        secondaryColor: '#f7fafc',
+        tertiaryColor: '#e2e8f0'
+      }
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // 返回顶部按钮显示/隐藏
+    window.addEventListener('scroll', function () {
+      const backToTop = document.querySelector('.back-to-top');
+      if (window.pageYOffset > 300) {
+        backToTop.style.display = 'block';
+      } else {
+        backToTop.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+
+</html>

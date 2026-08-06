@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfyUI Runninghub API 测试页面</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+
+    .section h3 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .result {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .success {
+      border-color: #28a745;
+      background-color: #d4edda;
+    }
+
+    .error {
+      border-color: #dc3545;
+      background-color: #f8d7da;
+    }
+
+    .loading {
+      color: #6c757d;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🚀 ComfyUI Runninghub API 测试页面</h1>
+
+    <!-- 文件上传测试 -->
+    <div class="section">
+      <h3>📁 文件上传测试 (POST /v1/upload)</h3>
+      <input type="file" id="fileInput" accept="image/*">
+      <select id="fileType">
+        <option value="image">image</option>
+        <option value="video">video</option>
+        <option value="audio">audio</option>
+      </select>
+      <button onclick="testUpload()">上传文件</button>
+      <div id="uploadResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- AI 生图测试 -->
+    <div class="section">
+      <h3>🎨 AI 生图测试 (POST /v1/generate/{workflow_name})</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <label>工作流:</label>
+          <select id="workflowSelect" onchange="updateInputFields()">
+            <option value="">加载中...</option>
+          </select>
+          <small style="color: #666;">选择要使用的工作流</small>
+        </div>
+        <div>
+          <label>提示词:</label>
+          <textarea id="prompt" placeholder="输入提示词">一个美丽的女孩，长发，微笑</textarea>
+        </div>
+        <!-- 图片名称输入（仅对图片提示工作流显示） -->
+        <div id="imageNameField" style="display: none;">
+          <label>图片名称:</label>
+          <input type="text" id="imageName"
+            placeholder="输入图片名称，如：748d64d51b49f76b394b96f5a553a17c45dfa90872e73b86d33f712725db9bc7.jpg">
+          <small style="color: #666;">需要先上传图片获取图片名称</small>
+        </div>
+        <!-- 图片尺寸输入（仅对国潮纸雕工作流显示） -->
+        <div id="imageSizeField" style="display: none;">
+          <label>图片尺寸:</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="number" id="width" value="1024" placeholder="宽度" style="flex: 1;">
+            <input type="number" id="height" value="1536" placeholder="高度" style="flex: 1;">
+          </div>
+        </div>
+      </div>
+      <button onclick="testGenerate()">开始生成</button>
+      <div id="generateResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 任务状态查询 -->
+    <div class="section">
+      <h3>📊 任务状态查询 (GET /v1/tasks/{task_id})</h3>
+      <input type="text" id="taskId" placeholder="输入任务ID">
+      <button onclick="testTaskStatus()">查询状态</button>
+      <div id="statusResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 获取任务结果 -->
+    <div class="section">
+      <h3>🖼️ 获取任务结果 (GET /v1/tasks/{task_id}/outputs)</h3>
+      <input type="text" id="outputTaskId" placeholder="输入任务ID">
+      <button onclick="testTaskOutputs()">获取结果</button>
+      <div id="outputResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 服务器状态 -->
+    <div class="section">
+      <h3>🔧 服务器状态</h3>
+      <button onclick="testServerStatus()">检查服务器状态</button>
+      <div id="serverResult" class="result" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8080';
+
+    // 显示结果的通用函数
+    function showResult(elementId, data, isError = false) {
+      const element = document.getElementById(elementId);
+      element.style.display = 'block';
+      element.className = `result ${isError ? 'error' : 'success'}`;
+      element.textContent = JSON.stringify(data, null, 2);
+    }
+
+    // 显示加载状态
+    function showLoading(elementId) {
+      const element = document.getElementById(elementId);
+      element.style.display = 'block';
+      element.className = 'result loading';
+      element.textContent = '加载中...';
+    }
+
+    // 文件上传测试
+    async function testUpload() {
+      const fileInput = document.getElementById('fileInput');
+      const fileType = document.getElementById('fileType').value;
+
+      if (!fileInput.files[0]) {
+        alert('请选择一个文件');
+        return;
+      }
+
+      showLoading('uploadResult');
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('fileType', fileType);
+
+      try {
+        const response = await fetch(`${API_BASE}/v1/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        showResult('uploadResult', result, !response.ok);
+      } catch (error) {
+        showResult('uploadResult', { error: error.message }, true);
+      }
+    }
+
+    // 更新输入字段显示
+    function updateInputFields() {
+      const workflowName = document.getElementById('workflowSelect').value;
+      const imageNameField = document.getElementById('imageNameField');
+      const imageSizeField = document.getElementById('imageSizeField');
+
+      // 根据工作流类型显示不同的输入字段
+      if (workflowName === 'image_prompt' || workflowName === 'image_edit') {
+        imageNameField.style.display = 'block';
+        imageSizeField.style.display = 'none';
+      } else {
+        imageNameField.style.display = 'none';
+        imageSizeField.style.display = 'block';
+      }
+    }
+
+    // AI 生图测试
+    async function testGenerate() {
+      const prompt = document.getElementById('prompt').value;
+      const workflowName = document.getElementById('workflowSelect').value;
+
+      if (!prompt.trim()) {
+        alert('请输入提示词');
+        return;
+      }
+
+      if (!workflowName) {
+        alert('请选择工作流');
+        return;
+      }
+
+      showLoading('generateResult');
+
+      // 根据工作流类型构建不同的payload
+      let payload = { prompt: prompt };
+
+      if (workflowName === 'image_prompt' || workflowName === 'image_edit') {
+        const imageName = document.getElementById('imageName').value;
+        if (!imageName.trim()) {
+          alert('请输入图片名称');
+          return;
+        }
+        payload.image_name = imageName;
+      } else {
+        // 其他工作流（如国潮纸雕工作流）
+        const width = parseInt(document.getElementById('width').value) || 1024;
+        const height = parseInt(document.getElementById('height').value) || 1536;
+        payload.width = width;
+        payload.height = height;
+      }
+
+      try {
+        const endpoint = `${API_BASE}/v1/generate/${workflowName}`;
+        console.log('发送请求到:', endpoint);
+        console.log('请求数据:', payload);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 300000); // 5分钟超时
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        console.log('响应状态:', response.status);
+        console.log('响应头:', response.headers);
+
+        const result = await response.json();
+        console.log('响应数据:', result);
+
+        // 如果返回了 taskId，开始轮询任务状态
+        if (result.taskId && result.status === 'PENDING') {
+          showResult('generateResult', result, !response.ok);
+          // 开始轮询任务状态
+          pollTaskStatus(result.taskId);
+        } else {
+          showResult('generateResult', result, !response.ok);
+        }
+      } catch (error) {
+        console.error('请求失败:', error);
+        if (error.name === 'AbortError') {
+          showResult('generateResult', { error: '请求超时（5分钟）', details: error.message }, true);
+        } else {
+          showResult('generateResult', { error: error.message, details: error.stack }, true);
+        }
+      }
+    }
+
+    // 轮询任务状态
+    async function pollTaskStatus(taskId) {
+      const maxAttempts = 60; // 最多轮询60次（5分钟）
+      let attempts = 0;
+
+      const poll = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/v1/tasks/${taskId}`);
+          const result = await response.json();
+
+          // 更新结果显示
+          showResult('generateResult', {
+            ...result,
+            polling: true,
+            attempts: attempts + 1,
+            message: `正在轮询任务状态... (${attempts + 1}/${maxAttempts})`
+          }, !response.ok);
+
+          if (result.status === 'SUCCESS' || result.status === 'FAILED') {
+            // 任务完成，获取输出结果
+            if (result.status === 'SUCCESS') {
+              try {
+                const outputsResponse = await fetch(`${API_BASE}/v1/tasks/${taskId}/outputs`);
+                const outputsResult = await outputsResponse.json();
+                showResult('generateResult', {
+                  ...result,
+                  outputs: outputsResult.outputs,
+                  polling: false,
+                  message: '任务完成！'
+                }, false);
+              } catch (error) {
+                showResult('generateResult', {
+                  ...result,
+                  polling: false,
+                  message: '任务完成，但获取输出失败'
+                }, false);
+              }
+            } else {
+              showResult('generateResult', {
+                ...result,
+                polling: false,
+                message: '任务失败'
+              }, true);
+            }
+            return;
+          }
+
+          attempts++;
+          if (attempts < maxAttempts) {
+            // 继续轮询
+            setTimeout(poll, 5000); // 5秒后再次轮询
+          } else {
+            // 超时
+            showResult('generateResult', {
+              taskId: taskId,
+              status: 'TIMEOUT',
+              polling: false,
+              message: '轮询超时，请手动查询任务状态'
+            }, true);
+          }
+        } catch (error) {
+          showResult('generateResult', {
+            taskId: taskId,
+            status: 'ERROR',
+            polling: false,
+            message: `轮询失败: ${error.message}`
+          }, true);
+        }
+      };
+
+      // 开始轮询
+      poll();
+    }
+
+    // 任务状态查询
+    async function testTaskStatus() {
+      const taskId = document.getElementById('taskId').value;
+
+      if (!taskId.trim()) {
+        alert('请输入任务ID');
+        return;
+      }
+
+      showLoading('statusResult');
+
+      try {
+        const response = await fetch(`${API_BASE}/v1/tasks/${taskId}`);
+        const result = await response.json();
+        showResult('statusResult', result, !response.ok);
+      } catch (error) {
+        showResult('statusResult', { error: error.message }, true);
+      }
+    }
+
+    // 获取任务结果
+    async function testTaskOutputs() {
+      const taskId = document.getElementById('outputTaskId').value;
+
+      if (!taskId.trim()) {
+        alert('请输入任务ID');
+        return;
+      }
+
+      showLoading('outputResult');
+
+      try {
+        const response = await fetch(`${API_BASE}/v1/tasks/${taskId}/outputs`);
+        const result = await response.json();
+        showResult('outputResult', result, !response.ok);
+      } catch (error) {
+        showResult('outputResult', { error: error.message }, true);
+      }
+    }
+
+    // 服务器状态检查
+    async function testServerStatus() {
+      showLoading('serverResult');
+
+      try {
+        const response = await fetch(`${API_BASE}/v1/upload`, {
+          method: 'OPTIONS'
+        });
+        const result = {
+          status: response.status,
+          statusText: response.statusText,
+          server: 'FastAPI Server',
+          timestamp: new Date().toISOString()
+        };
+        showResult('serverResult', result, !response.ok);
+      } catch (error) {
+        showResult('serverResult', {
+          error: '服务器连接失败',
+          details: error.message,
+          suggestion: '请确保服务器正在运行在 http://localhost:8080'
+        }, true);
+      }
+    }
+
+    // 页面加载完成后的初始化
+    // 获取工作流列表
+    async function loadWorkflows() {
+      try {
+        const response = await fetch(`${API_BASE}/v1/workflows`);
+        const result = await response.json();
+
+        if (result.workflows) {
+          const select = document.getElementById('workflowSelect');
+          select.innerHTML = '';
+
+          result.workflows.forEach(workflow => {
+            const option = document.createElement('option');
+            option.value = workflow.name;
+            option.textContent = workflow.display_name;
+            select.appendChild(option);
+          });
+
+          // 工作流加载完成后更新字段显示
+          updateInputFields();
+        }
+      } catch (error) {
+        console.error('获取工作流列表失败:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('ComfyUI Runninghub API 测试页面已加载');
+      console.log('API 基础地址:', API_BASE);
+      loadWorkflows();
+
+      // 确保初始状态正确
+      updateInputFields();
+    });
+  </script>
+</body>
+
+</html>

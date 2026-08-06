@@ -1,0 +1,272 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fasium-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-comfyui_tenant_service}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-comfyui_tenant_service}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fasium-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  runninghub-service:
+    build:
+      context: ./comfyui-runninghub
+      dockerfile: Dockerfile
+    container_name: fasium-runninghub
+    environment:
+      RUNNINGHUB_API_KEY: ${RUNNINGHUB_API_KEY:-replace-me}
+      RUNNINGHUB_HOST: ${RUNNINGHUB_HOST:-https://www.runninghub.cn}
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-60}
+      POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-5}
+      MAX_POLL_SECONDS: ${MAX_POLL_SECONDS:-300}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health').read()",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  tenant-service:
+    build:
+      context: ./comfyui-tenant-service
+      dockerfile: Dockerfile
+    container_name: fasium-tenant
+    environment:
+      RUNNINGHUB_SERVICE_URL: http://runninghub-service:8080
+      STORAGE_TYPE: ${STORAGE_TYPE:-postgresql}
+      JSON_STORAGE_PATH: /app/database
+      SQLITE_PATH: /app/tenant_service.db
+      SECRET_KEY: ${SECRET_KEY:-replace-me}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      JWT_SIGNING_ALGORITHM: ${JWT_SIGNING_ALGORITHM:-HS256}
+      JWT_ALLOW_HS256_FALLBACK: ${JWT_ALLOW_HS256_FALLBACK:-true}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-replace-me}
+      IMAGE_PROVIDER: ${IMAGE_PROVIDER:-poloapi}
+      CHERRYIN_API_KEY: ${CHERRYIN_API_KEY:-}
+      CHERRYIN_BASE_URL: ${CHERRYIN_BASE_URL:-https://open.cherryin.net/v1}
+      CHERRYIN_MODEL: ${CHERRYIN_MODEL:-qwen/qwen-image-edit}
+      VOD_SECRET_ID: ${VOD_SECRET_ID:-}
+      VOD_SECRET_KEY: ${VOD_SECRET_KEY:-}
+      VOD_REGION: ${VOD_REGION:-ap-guangzhou}
+      VOD_ENDPOINT: ${VOD_ENDPOINT:-vod.tencentcloudapi.com}
+      VOD_HTTP_TIMEOUT_MS: ${VOD_HTTP_TIMEOUT_MS:-60000}
+      VOD_SUB_APP_ID: ${VOD_SUB_APP_ID:-}
+      VOD_MODEL_NAME: ${VOD_MODEL_NAME:-GEM}
+      VOD_MODEL_VERSION: ${VOD_MODEL_VERSION:-3.1}
+      VOD_IMAGE2_MODEL_VERSION: ${VOD_IMAGE2_MODEL_VERSION:-image2_medium}
+      VOD_IMAGE2_RESOLUTION: ${VOD_IMAGE2_RESOLUTION:-1K}
+      VOD_IMAGE2_ASPECT_RATIO: ${VOD_IMAGE2_ASPECT_RATIO:-}
+      VOD_TASK_POLL_INTERVAL_SECONDS: ${VOD_TASK_POLL_INTERVAL_SECONDS:-2}
+      VOD_TASK_TIMEOUT_SECONDS: ${VOD_TASK_TIMEOUT_SECONDS:-300}
+      OUTPUT_STORAGE_BACKEND: ${OUTPUT_STORAGE_BACKEND:-local}
+      OUTPUT_STORAGE_PATH: ${OUTPUT_STORAGE_PATH:-/app/output}
+      OUTPUT_COS_SECRET_ID: ${OUTPUT_COS_SECRET_ID:-}
+      OUTPUT_COS_SECRET_KEY: ${OUTPUT_COS_SECRET_KEY:-}
+      OUTPUT_COS_BUCKET: ${OUTPUT_COS_BUCKET:-}
+      OUTPUT_COS_REGION: ${OUTPUT_COS_REGION:-ap-shanghai}
+      OUTPUT_COS_PREFIX: ${OUTPUT_COS_PREFIX:-root/fasium/output}
+      OUTPUT_COS_PUBLIC_BASE_URL: ${OUTPUT_COS_PUBLIC_BASE_URL:-}
+      POLOAPI_BASE_URL: ${POLOAPI_BASE_URL:-https://work.poloapi.com/v1}
+      POLOAPI_TEXT_BASE_URL: ${POLOAPI_TEXT_BASE_URL:-}
+      POLOAPI_IMAGE_BASE_URL: ${POLOAPI_IMAGE_BASE_URL:-}
+      POLOAPI_APIKEY: ${POLOAPI_APIKEY:-}
+      POLOAPI_TEXT_APIKEY: ${POLOAPI_TEXT_APIKEY:-}
+      POLOAPI_AUDIT_BASE_URL: ${POLOAPI_AUDIT_BASE_URL:-https://api.deepseek.com}
+      POLOAPI_AUDIT_APIKEY: ${POLOAPI_AUDIT_APIKEY:-}
+      POLOAPI_AUDIT_MODEL: ${POLOAPI_AUDIT_MODEL:-deepseek-v4-pro}
+      POLOAPI_IMAGE_APIKEY: ${POLOAPI_IMAGE_APIKEY:-}
+      POLOAPI_DEFAULT_MODEL: ${POLOAPI_DEFAULT_MODEL:-gemini-2.5-flash-image}
+      POLOAPI_BAOKUAN_MODEL: ${POLOAPI_BAOKUAN_MODEL:-gemini-2.5-flash-image-preview}
+      POLOAPI_SINGLETON_MODEL: ${POLOAPI_SINGLETON_MODEL:-}
+      POLOAPI_TEXT_MODEL: ${POLOAPI_TEXT_MODEL:-}
+      POLOAPI_IMAGE_MODEL: ${POLOAPI_IMAGE_MODEL:-}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      TASK_QUEUE_ENABLED: ${TASK_QUEUE_ENABLED:-true}
+      TASK_QUEUE_NAME: ${TASK_QUEUE_NAME:-tenant-task-completion}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-comfyui_tenant_service}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8081}
+      ALIPAY_ENV: ${ALIPAY_ENV:-sandbox}
+      ALIPAY_APP_ID: ${ALIPAY_APP_ID:-}
+      ALIPAY_GATEWAY: ${ALIPAY_GATEWAY:-https://openapi-sandbox.dl.alipaydev.com/gateway.do}
+      ALIPAY_PUBLIC_KEY: ${ALIPAY_PUBLIC_KEY:-}
+      ALIPAY_PRIVATE_KEY: ${ALIPAY_PRIVATE_KEY:-}
+      ALIPAY_PRIVATE_KEY_BASE64: ${ALIPAY_PRIVATE_KEY_BASE64:-}
+      ALIPAY_APP_AUTH_TOKEN: ${ALIPAY_APP_AUTH_TOKEN:-}
+      ALIPAY_NOTIFY_URL: ${ALIPAY_NOTIFY_URL:-}
+      ALIPAY_RETURN_URL: ${ALIPAY_RETURN_URL:-}
+    volumes:
+      - ./comfyui-tenant-service/database:/app/database
+      - ./comfyui-tenant-service/output:/app/output
+      - ./comfyui-tenant-service/tenant_service.db:/app/tenant_service.db
+    ports:
+      - "8081:8081"
+    depends_on:
+      runninghub-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health').read()",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  tenant-worker:
+    build:
+      context: ./comfyui-tenant-service
+      dockerfile: Dockerfile
+    container_name: fasium-tenant-worker
+    command: ["python", "-m", "app.workers.task_worker"]
+    environment:
+      RUNNINGHUB_SERVICE_URL: http://runninghub-service:8080
+      STORAGE_TYPE: ${STORAGE_TYPE:-postgresql}
+      JSON_STORAGE_PATH: /app/database
+      SQLITE_PATH: /app/tenant_service.db
+      SECRET_KEY: ${SECRET_KEY:-replace-me}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      JWT_SIGNING_ALGORITHM: ${JWT_SIGNING_ALGORITHM:-HS256}
+      JWT_ALLOW_HS256_FALLBACK: ${JWT_ALLOW_HS256_FALLBACK:-true}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-replace-me}
+      IMAGE_PROVIDER: ${IMAGE_PROVIDER:-poloapi}
+      CHERRYIN_API_KEY: ${CHERRYIN_API_KEY:-}
+      CHERRYIN_BASE_URL: ${CHERRYIN_BASE_URL:-https://open.cherryin.net/v1}
+      CHERRYIN_MODEL: ${CHERRYIN_MODEL:-qwen/qwen-image-edit}
+      VOD_SECRET_ID: ${VOD_SECRET_ID:-}
+      VOD_SECRET_KEY: ${VOD_SECRET_KEY:-}
+      VOD_REGION: ${VOD_REGION:-ap-guangzhou}
+      VOD_ENDPOINT: ${VOD_ENDPOINT:-vod.tencentcloudapi.com}
+      VOD_HTTP_TIMEOUT_MS: ${VOD_HTTP_TIMEOUT_MS:-60000}
+      VOD_SUB_APP_ID: ${VOD_SUB_APP_ID:-}
+      VOD_MODEL_NAME: ${VOD_MODEL_NAME:-GEM}
+      VOD_MODEL_VERSION: ${VOD_MODEL_VERSION:-3.1}
+      VOD_IMAGE2_MODEL_VERSION: ${VOD_IMAGE2_MODEL_VERSION:-image2_medium}
+      VOD_IMAGE2_RESOLUTION: ${VOD_IMAGE2_RESOLUTION:-1K}
+      VOD_IMAGE2_ASPECT_RATIO: ${VOD_IMAGE2_ASPECT_RATIO:-}
+      VOD_TASK_POLL_INTERVAL_SECONDS: ${VOD_TASK_POLL_INTERVAL_SECONDS:-2}
+      VOD_TASK_TIMEOUT_SECONDS: ${VOD_TASK_TIMEOUT_SECONDS:-300}
+      OUTPUT_STORAGE_BACKEND: ${OUTPUT_STORAGE_BACKEND:-local}
+      OUTPUT_STORAGE_PATH: ${OUTPUT_STORAGE_PATH:-/app/output}
+      OUTPUT_COS_SECRET_ID: ${OUTPUT_COS_SECRET_ID:-}
+      OUTPUT_COS_SECRET_KEY: ${OUTPUT_COS_SECRET_KEY:-}
+      OUTPUT_COS_BUCKET: ${OUTPUT_COS_BUCKET:-}
+      OUTPUT_COS_REGION: ${OUTPUT_COS_REGION:-ap-shanghai}
+      OUTPUT_COS_PREFIX: ${OUTPUT_COS_PREFIX:-root/fasium/output}
+      OUTPUT_COS_PUBLIC_BASE_URL: ${OUTPUT_COS_PUBLIC_BASE_URL:-}
+      POLOAPI_BASE_URL: ${POLOAPI_BASE_URL:-https://work.poloapi.com/v1}
+      POLOAPI_TEXT_BASE_URL: ${POLOAPI_TEXT_BASE_URL:-}
+      POLOAPI_IMAGE_BASE_URL: ${POLOAPI_IMAGE_BASE_URL:-}
+      POLOAPI_APIKEY: ${POLOAPI_APIKEY:-}
+      POLOAPI_TEXT_APIKEY: ${POLOAPI_TEXT_APIKEY:-}
+      POLOAPI_AUDIT_BASE_URL: ${POLOAPI_AUDIT_BASE_URL:-https://api.deepseek.com}
+      POLOAPI_AUDIT_APIKEY: ${POLOAPI_AUDIT_APIKEY:-}
+      POLOAPI_AUDIT_MODEL: ${POLOAPI_AUDIT_MODEL:-deepseek-v4-pro}
+      POLOAPI_IMAGE_APIKEY: ${POLOAPI_IMAGE_APIKEY:-}
+      POLOAPI_DEFAULT_MODEL: ${POLOAPI_DEFAULT_MODEL:-gemini-2.5-flash-image}
+      POLOAPI_BAOKUAN_MODEL: ${POLOAPI_BAOKUAN_MODEL:-gemini-2.5-flash-image-preview}
+      POLOAPI_SINGLETON_MODEL: ${POLOAPI_SINGLETON_MODEL:-}
+      POLOAPI_TEXT_MODEL: ${POLOAPI_TEXT_MODEL:-}
+      POLOAPI_IMAGE_MODEL: ${POLOAPI_IMAGE_MODEL:-}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      TASK_QUEUE_ENABLED: ${TASK_QUEUE_ENABLED:-true}
+      TASK_QUEUE_NAME: ${TASK_QUEUE_NAME:-tenant-task-completion}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE:-comfyui_tenant_service}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8081}
+      ALIPAY_ENV: ${ALIPAY_ENV:-sandbox}
+      ALIPAY_APP_ID: ${ALIPAY_APP_ID:-}
+      ALIPAY_GATEWAY: ${ALIPAY_GATEWAY:-https://openapi-sandbox.dl.alipaydev.com/gateway.do}
+      ALIPAY_PUBLIC_KEY: ${ALIPAY_PUBLIC_KEY:-}
+      ALIPAY_PRIVATE_KEY: ${ALIPAY_PRIVATE_KEY:-}
+      ALIPAY_PRIVATE_KEY_BASE64: ${ALIPAY_PRIVATE_KEY_BASE64:-}
+      ALIPAY_APP_AUTH_TOKEN: ${ALIPAY_APP_AUTH_TOKEN:-}
+      ALIPAY_NOTIFY_URL: ${ALIPAY_NOTIFY_URL:-}
+      ALIPAY_RETURN_URL: ${ALIPAY_RETURN_URL:-}
+    volumes:
+      - ./comfyui-tenant-service/database:/app/database
+      - ./comfyui-tenant-service/output:/app/output
+      - ./comfyui-tenant-service/tenant_service.db:/app/tenant_service.db
+    depends_on:
+      runninghub-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./comfyui-clothing
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_TENANT_API_URL: http://tenant-service:8081
+        TENANT_API_BASE_URL: http://tenant-service:8081
+        NEXT_PUBLIC_SHOW_CREDITS_NAV: ${NEXT_PUBLIC_SHOW_CREDITS_NAV:-true}
+    container_name: fasium-frontend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_TENANT_API_URL: http://tenant-service:8081
+      TENANT_API_BASE_URL: http://tenant-service:8081
+      NEXT_PUBLIC_SHOW_CREDITS_NAV: ${NEXT_PUBLIC_SHOW_CREDITS_NAV:-true}
+    ports:
+      - "3000:3000"
+    depends_on:
+      tenant-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://127.0.0.1:3000/",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data:
