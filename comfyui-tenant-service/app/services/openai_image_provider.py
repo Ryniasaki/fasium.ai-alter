@@ -632,29 +632,48 @@ class CherryInOpenAIImageProvider:
         self.logger = get_main_logger()
         self.api_key = (self.settings.cherryin_api_key or "").strip()
         self.base_url = (self.settings.cherryin_base_url or "https://open.cherryin.net/v1").rstrip("/")
-        self.model = (self.settings.cherryin_model or "qwen/qwen-image-edit").strip()
+        self.default_model = (self.settings.cherryin_model or "qwen/qwen-image-edit-2509").strip()
         self._client = httpx.AsyncClient(timeout=120.0, trust_env=False)
 
     async def close(self) -> None:
         await self._client.aclose()
 
     def _resolve_model(self, requested_model: Optional[str]) -> str:
-        """解析模型名，支持调用方指定不同模型"""
+        """解析模型名，添加 CherryIN 要求的 google/ / openai/ 前缀。
+        
+        前端传递的是短名称（gemini-2.5-flash-image），CherryIN 要求完整前缀。
+        例如：gemini-2.5-flash-image → google/gemini-2.5-flash-image
+        
+        Qwen 切换说明：当 CherryIN 配置好 qwen image-edit 通道后，
+        取消下方 QWEN_MAP 注释并启用映射即可。
+        """
         if requested_model:
             normalized = requested_model.strip().lower()
-            # 如果请求的模型名包含 qwen 前缀，直接使用
-            if normalized.startswith("qwen/"):
+            
+            # Qwen 通道就绪时取消注释以激活模型替换
+            # QWEN_MAP = {
+            #     "banana": "qwen/qwen-image-edit-2509",
+            #     "image-edit-pro": "qwen/qwen-image-edit-2509",
+            #     "gemini-3-pro-image-preview": "qwen/qwen-image-edit-2509",
+            #     "gpt-image-2": "qwen/qwen-image-edit-2509",
+            #     "gemini-2.5-flash-image": "qwen/qwen-image-edit-2509",
+            # }
+            # if normalized in QWEN_MAP:
+            #     return QWEN_MAP[normalized]
+            
+            # 已带前缀，直接透传
+            if normalized.startswith("qwen/") or normalized.startswith("google/") or normalized.startswith("openai/"):
                 return requested_model.strip()
-            # 映射旧模型名到 CherryIn 模型
-            model_map = {
-                "banana": "qwen/qwen-image-edit",
-                "image-edit-pro": "qwen/qwen-image-edit",
-                "gemini-3-pro-image-preview": "qwen/qwen-image-edit",
-                "gpt-image-2": "qwen/qwen-image-edit",
-                "gemini-2.5-flash-image": "qwen/qwen-image-edit",
-            }
-            return model_map.get(normalized, self.model)
-        return self.model
+            
+            # 添加 CherryIN 所需前缀
+            if normalized.startswith("gemini"):
+                return f"google/{requested_model.strip()}"
+            if normalized.startswith("gpt"):
+                return f"openai/{requested_model.strip()}"
+            
+            # 默认直接透传
+            return requested_model.strip()
+        return self.default_model
 
     @staticmethod
     def _encode_image_as_data_url(file_bytes: bytes, mime_type: str) -> str:

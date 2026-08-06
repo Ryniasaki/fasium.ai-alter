@@ -86,7 +86,7 @@ class Settings(BaseSettings):
     # CherryIn API configuration (OpenAI-compatible proxy)
     cherryin_api_key: Optional[str] = None
     cherryin_base_url: str = "https://open.cherryin.net/v1"
-    cherryin_model: str = "qwen/qwen-image-edit"
+    cherryin_model: str = "google/gemini-2.5-flash-image"
     pressure_test_mode: bool = False
 
     # Storage configuration (json, mysql, sqlite, postgres/postgresql)
